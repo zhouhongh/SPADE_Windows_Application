@@ -2,6 +2,8 @@
 from pygame.locals import *
 import math
 import sys
+import cv2 as cv
+import numpy as np
 
 
 class Brush:
@@ -227,9 +229,22 @@ class Painter:
                         pass
                     # added by zhh
                     elif self.menu.doFill ==  True:
-                        if self.screen.get_at(event.pos) != self.brush.color:
-                            clicked_color = (self.screen.get_at(event.pos)[0], self.screen.get_at(event.pos)[1], self.screen.get_at(event.pos)[2])
-                            self.brush.fill(event.pos, clicked_color)
+                        # if self.screen.get_at(event.pos) != self.brush.color:
+                        #     clicked_color = (self.screen.get_at(event.pos)[0], self.screen.get_at(event.pos)[1], self.screen.get_at(event.pos)[2])
+                        #     self.brush.fill(event.pos, clicked_color)
+
+                        image_data = pygame.surfarray.array3d(self.screen)
+                        h, w = image_data.shape[:2]
+                        mask = np.zeros([h + 2, w + 2], np.uint8)
+                        print(event.pos)
+                        cv.floodFill(image_data, mask, (event.pos[1], event.pos[0]), self.brush.color, (1, 1, 1), (1, 1, 1),
+                                     cv.FLOODFILL_FIXED_RANGE)
+                        image_quote = pygame.surfarray.pixels3d(self.screen)
+                        for x in range(image_data.shape[0]):
+                            for y in range(image_data.shape[1]):
+                                image_quote[x][y] = image_data[x][y]
+                        del image_quote
+                        self.screen.unlock()
                     else:
                         self.brush.start_draw(event.pos)
                 elif event.type == MOUSEMOTION:
