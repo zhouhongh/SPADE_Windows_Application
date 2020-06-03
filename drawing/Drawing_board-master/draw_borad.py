@@ -216,7 +216,7 @@ class Painter:
     def run(self):
         self.screen.fill((255, 255, 255))
         while True:
-            self.clock.tick(30)
+            self.clock.tick(50)
             for event in pygame.event.get():
                 if event.type == QUIT:
                     return
@@ -240,9 +240,10 @@ class Painter:
                         cv.floodFill(image_data, mask, (event.pos[1], event.pos[0]), self.brush.color, (1, 1, 1), (1, 1, 1),
                                      cv.FLOODFILL_FIXED_RANGE)
                         image_quote = pygame.surfarray.pixels3d(self.screen)
-                        for x in range(image_data.shape[0]):
-                            for y in range(image_data.shape[1]):
-                                image_quote[x][y] = image_data[x][y]
+                        # for x in range(image_data.shape[0]):
+                        #     for y in range(image_data.shape[1]):
+                        #         image_quote[x][y] = image_data[x][y]
+                        image_quote[:] = image_data[:]
                         del image_quote
                         self.screen.unlock()
                     else:
