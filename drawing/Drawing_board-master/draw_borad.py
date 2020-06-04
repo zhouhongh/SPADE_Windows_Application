@@ -261,5 +261,4 @@ def main():
     app.run()
 
 if __name__ == '__main__':
-    sys.setrecursionlimit(2000)
     main()
