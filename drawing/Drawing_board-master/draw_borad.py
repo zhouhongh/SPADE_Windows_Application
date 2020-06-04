@@ -236,15 +236,14 @@ class Painter:
                         image_data = pygame.surfarray.array3d(self.screen)
                         h, w = image_data.shape[:2]
                         mask = np.zeros([h + 2, w + 2], np.uint8)
-                        print(event.pos)
                         cv.floodFill(image_data, mask, (event.pos[1], event.pos[0]), self.brush.color, (1, 1, 1), (1, 1, 1),
                                      cv.FLOODFILL_FIXED_RANGE)
-                        image_quote = pygame.surfarray.pixels3d(self.screen)
+                        image_ref = pygame.surfarray.pixels3d(self.screen)
                         # for x in range(image_data.shape[0]):
                         #     for y in range(image_data.shape[1]):
                         #         image_quote[x][y] = image_data[x][y]
-                        image_quote[:] = image_data[:]
-                        del image_quote
+                        image_ref[:] = image_data[:]
+                        del image_ref
                         self.screen.unlock()
                     else:
                         self.brush.start_draw(event.pos)
