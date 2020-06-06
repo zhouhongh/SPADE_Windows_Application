@@ -210,9 +210,13 @@ class Menu:
             self.doFill = True
             return True
 
-        if self.save_rect.collidepoint(pos):  # 油漆桶
+        if self.save_rect.collidepoint(pos):  # 保存
             print("set Save to True")
             self.doSave = True
+            return True
+        if self.input_rect.collidepoint(pos):  # 导入
+            print("set input to True")
+            self.doInput = True
             return True
 
         return False
@@ -282,6 +286,13 @@ class Painter:
                             pygame.image.save(self.sub_screen, filename)
                         else:
                             pygame.image.save(self.sub_screen, filename + '.jpg')
+                    elif self.menu.doInput:
+                        self.menu.doInput = False
+                        filename = tkinter.filedialog.askopenfilename()
+                        if filename != '':
+                            input_img = pygame.image.load(filename).convert()
+                            self.sub_screen.blit(input_img, (0, 0))
+
                     else:
                         sub_pos = (event.pos[0] - self.MENU_WIDTH, event.pos[1])  # 转换为subsurface中pos
                         self.brush.start_draw(sub_pos)  # subsurface适配
