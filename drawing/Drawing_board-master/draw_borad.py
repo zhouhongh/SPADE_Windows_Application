@@ -5,7 +5,10 @@ import sys
 import cv2 as cv
 import numpy as np
 import tkinter.filedialog
-
+from tkinter import *
+# 修改颜色为指定label
+# 默认画笔轨迹处理
+# 导出到神经网络按钮
 
 class Brush:
     def __init__(self, screen):
@@ -261,6 +264,26 @@ class Painter:
         del image_quote
         self.sub_screen.unlock()
 
+    def save_broad(self):
+        root = Tk()
+        filename = tkinter.filedialog.asksaveasfilename()
+        root.destroy()
+        print(filename)
+        self.menu.doSave = False
+        if '.jpg' in filename:
+            pygame.image.save(self.sub_screen, filename)
+        else:
+            pygame.image.save(self.sub_screen, filename + '.jpg')
+
+    def input_broad(self):
+        self.menu.doInput = False
+        root = Tk()
+        filename = tkinter.filedialog.askopenfilename()
+        root.destroy()
+        if filename != '':
+            input_img = pygame.image.load(filename).convert()
+            self.sub_screen.blit(input_img, (0, 0))
+
     def run(self):
         self.screen.fill((255, 255, 255))
         while True:
@@ -278,21 +301,10 @@ class Painter:
                     # added by zhh
                     elif self.menu.doFill:
                         self.fill_by_cv2(event)
-                    elif self.menu.doSave:
-                        filename = tkinter.filedialog.asksaveasfilename()
-                        print(filename)
-                        self.menu.doSave = False
-                        if '.jpg' in filename:
-                            pygame.image.save(self.sub_screen, filename)
-                        else:
-                            pygame.image.save(self.sub_screen, filename + '.jpg')
-                    elif self.menu.doInput:
-                        self.menu.doInput = False
-                        filename = tkinter.filedialog.askopenfilename()
-                        if filename != '':
-                            input_img = pygame.image.load(filename).convert()
-                            self.sub_screen.blit(input_img, (0, 0))
-
+                    elif self.menu.doSave:  # 保存
+                        self.save_broad()
+                    elif self.menu.doInput:  # 导入
+                        self.input_broad()
                     else:
                         sub_pos = (event.pos[0] - self.MENU_WIDTH, event.pos[1])  # 转换为subsurface中pos
                         self.brush.start_draw(sub_pos)  # subsurface适配
