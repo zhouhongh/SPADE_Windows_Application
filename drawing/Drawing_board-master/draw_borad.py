@@ -6,8 +6,11 @@ import cv2 as cv
 import numpy as np
 import tkinter.filedialog
 from tkinter import *
+
+
 # 修改颜色为指定label
 # 默认画笔轨迹处理
+# 笔尺寸最大到9
 # 导出到神经网络按钮
 
 class Brush:
@@ -129,6 +132,7 @@ class Menu:
         for (i, rgb) in enumerate(self.colors):
             rect = pygame.Rect(10 + i % 2 * 32, 254 + i / 2 * 32, 32, 32)
             self.colors_rect.append(rect)
+        # 画笔
         self.pens = [
             pygame.image.load("images/pen1.png").convert_alpha(),
             pygame.image.load("images/pen2.png").convert_alpha(),
@@ -145,7 +149,7 @@ class Menu:
         self.input_img = pygame.image.load("images/input.png").convert_alpha()
         self.input_rect = pygame.Rect(37 + 2, 10 + 40, 32, 32)
         self.doInput = False
-
+        # 尺寸调整按钮
         self.sizes = [
             pygame.image.load("images/big.png").convert_alpha(),
             pygame.image.load("images/small.png").convert_alpha()
@@ -156,7 +160,9 @@ class Menu:
             self.sizes_rect.append(rect)
 
         # added by zhh
-        self.fill_rect = pygame.Rect(26, 550, 32, 32)
+        # 油漆桶按钮
+        # self.fill_rect = pygame.Rect(26, 550, 32, 32)
+        self.fill_rect = pygame.Rect(2, 10 + 40 + 40, 32, 32)
         self.fill_image = pygame.image.load("images/bucket.png").convert_alpha()
         self.doFill = False
 
@@ -228,8 +234,8 @@ class Menu:
 class Painter:
     def __init__(self):
         self.MENU_WIDTH = 74
-        self.SCREEN_WIDTH = int(256*2.5) + self.MENU_WIDTH  # 确保画板保持256.256比例
-        self.SCREEN_HEIGHT = int(256*2.5)
+        self.SCREEN_WIDTH = int(256 * 2.5) + self.MENU_WIDTH  # 确保画板保持256.256比例
+        self.SCREEN_HEIGHT = int(256 * 2.5)
 
         self.BROAD_WIDTH = self.SCREEN_WIDTH - self.MENU_WIDTH
         self.MENU_HEIGHT = self.SCREEN_HEIGHT
@@ -237,7 +243,7 @@ class Painter:
 
         self.screen = pygame.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))  # 设置屏幕尺寸
         self.sub_screen = \
-            self.screen.subsurface((self.MENU_WIDTH, 0), (self.SCREEN_WIDTH-self.MENU_WIDTH, self.SCREEN_HEIGHT-0))
+            self.screen.subsurface((self.MENU_WIDTH, 0), (self.SCREEN_WIDTH - self.MENU_WIDTH, self.SCREEN_HEIGHT - 0))
         pygame.display.set_caption("Painter")  # caption标题  设置标题
         self.clock = pygame.time.Clock()  # 帧速率  帮助我们确保程序以某一个最大的FPS运行
         self.brush = Brush(self.sub_screen)  # 屏幕作为参数传给Brush类
@@ -296,15 +302,14 @@ class Painter:
                         self.screen.fill((255, 255, 255))
 
                 elif event.type == MOUSEBUTTONDOWN:
-                    if event.pos[0] <= self.MENU_WIDTH and not self.menu.click_button(event.pos):  # 点歪了,别画
-                        pass
+                    if event.pos[0] <= self.MENU_WIDTH and self.menu.click_button(event.pos):  # 点在按钮上了
+                        if self.menu.doSave:  # 保存
+                            self.save_broad()
+                        elif self.menu.doInput:  # 导入
+                            self.input_broad()
                     # added by zhh
                     elif self.menu.doFill:
                         self.fill_by_cv2(event)
-                    elif self.menu.doSave:  # 保存
-                        self.save_broad()
-                    elif self.menu.doInput:  # 导入
-                        self.input_broad()
                     else:
                         sub_pos = (event.pos[0] - self.MENU_WIDTH, event.pos[1])  # 转换为subsurface中pos
                         self.brush.start_draw(sub_pos)  # subsurface适配
