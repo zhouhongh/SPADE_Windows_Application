@@ -165,6 +165,10 @@ class Menu:
         self.fill_rect = pygame.Rect(2, 10 + 40 + 40, 32, 32)
         self.fill_image = pygame.image.load("images/bucket.png").convert_alpha()
         self.doFill = False
+        # 输出到神经网络
+        self.out2DNN_rect = pygame.Rect(37 + 2, 10 + 40 + 40, 32, 32)
+        self.out2DNN_image = pygame.image.load("images/output.png").convert_alpha()
+        self.doOut2DNN = False
 
     def set_brush(self, brush):
         self.brush = brush
@@ -194,6 +198,8 @@ class Menu:
         self.screen.blit(self.save_img, self.save_rect.topleft)
         # 导入按钮
         self.screen.blit(self.input_img, self.input_rect.topleft)
+        # 输出到DNN按钮
+        self.screen.blit(self.out2DNN_image, self.out2DNN_rect.topleft)
 
     def click_button(self, pos):  # 颜色放进list中 分别对应 button, 返回ture表示有按键被按下
         for (i, rect) in enumerate(self.pens_rect):  # 画笔
@@ -227,7 +233,10 @@ class Menu:
             print("set input to True")
             self.doInput = True
             return True
-
+        if self.out2DNN_rect.collidepoint(pos):  # 导出到DNN
+            print("set out2DNN to True")
+            self.doOut2DNN = True
+            return True
         return False
 
 
@@ -250,7 +259,7 @@ class Painter:
         self.menu = Menu(self.screen)  #
         self.menu.set_brush(self.brush)
 
-    def fill_by_cv2(self, event):
+    def fill_by_cv2(self, pos):
         # if self.screen.get_at(event.pos) != self.brush.color: clicked_color = (self.screen.get_at(
         # event.pos)[0], self.screen.get_at(event.pos)[1], self.screen.get_at(event.pos)[2])
         # self.brush.fill(event.pos, clicked_color)
@@ -258,8 +267,8 @@ class Painter:
         image_data = pygame.surfarray.array3d(self.sub_screen)
         h, w = image_data.shape[:2]
         mask = np.zeros([h + 2, w + 2], np.uint8)
-        print(event.pos)
-        cv.floodFill(image_data, mask, (event.pos[1], event.pos[0]), self.brush.color, (1, 1, 1),
+        print(pos)
+        cv.floodFill(image_data, mask, (pos[1], pos[0]), self.brush.color, (1, 1, 1),
                      (1, 1, 1),
                      cv.FLOODFILL_FIXED_RANGE)
         image_quote = pygame.surfarray.pixels3d(self.sub_screen)
@@ -303,13 +312,19 @@ class Painter:
 
                 elif event.type == MOUSEBUTTONDOWN:
                     if event.pos[0] <= self.MENU_WIDTH and self.menu.click_button(event.pos):  # 点在按钮上了
+                        # 点到按钮需要立即执行的
                         if self.menu.doSave:  # 保存
                             self.save_broad()
                         elif self.menu.doInput:  # 导入
                             self.input_broad()
+                        elif self.menu.doOut2DNN:  # 导出到DNN
+                            self.menu.doOut2DNN = False
+                            print('Out2DNN')
                     # added by zhh
+                    # 点到按钮需要下次执行的
                     elif self.menu.doFill:
-                        self.fill_by_cv2(event)
+                        sub_pos = (event.pos[0] - self.MENU_WIDTH, event.pos[1])  # 转换为subsurface中pos
+                        self.fill_by_cv2(sub_pos)
                     else:
                         sub_pos = (event.pos[0] - self.MENU_WIDTH, event.pos[1])  # 转换为subsurface中pos
                         self.brush.start_draw(sub_pos)  # subsurface适配
