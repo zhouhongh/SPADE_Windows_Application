@@ -1,7 +1,6 @@
 ﻿import pygame
 from pygame.locals import *
 import math
-import sys
 import cv2 as cv
 import numpy as np
 import tkinter.filedialog
@@ -9,8 +8,6 @@ from tkinter import *
 
 
 # 修改颜色为指定label
-# 默认画笔轨迹处理
-# 笔尺寸最大到9
 
 class Brush:
     def __init__(self, screen):
@@ -19,7 +16,7 @@ class Brush:
         self.size = 1  # 初始尺寸
         self.drawing = False  # 是否选中
         self.last_pos = None  # 最后的位置
-        self.style = True  # 刷子的样式
+        self.style = False  # 刷子的样式
         self.brush = pygame.image.load("images/brush.png").convert_alpha()
         # 转换成xx  不用纠结   此变量表示原始图片，放大、缩小、变色在此原始图片基础上
         self.brush_now = self.brush.subsurface((0, 0), (1, 1))  # 子表面
@@ -70,7 +67,8 @@ class Brush:
             size = 32
         print("* set brush size to", size)
         self.size = size
-        self.brush_now = self.brush.subsurface((0, 0), (size * 2, size * 2))
+        if self.style:  # 样式时调整样式尺寸，圆时无需调整，>11时还是会出问题
+            self.brush_now = self.brush.subsurface((0, 0), (size * 2, size * 2))
 
     def get_size(self):
         return self.size
@@ -173,23 +171,23 @@ class Menu:
         self.brush = brush
 
     def draw(self):  # draw buttons
-        for (i, img) in enumerate(self.pens):
+        for (i, img) in enumerate(self.pens):  # 笔按钮
             self.screen.blit(img, self.pens_rect[i].topleft)
-        for (i, img) in enumerate(self.sizes):
+        for (i, img) in enumerate(self.sizes):  # 尺寸按钮
             self.screen.blit(img, self.sizes_rect[i].topleft)
-        self.screen.fill((255, 255, 255), (10, 180, 64, 64))
+        self.screen.fill((255, 255, 255), (10, 180, 64, 64))  # 尺寸框白底
         pygame.draw.rect(self.screen, (0, 0, 0), (10, 180, 64, 64), 1)
         size = self.brush.get_size()
-        x = 10 + 32
-        y = 180 + 32
-        if self.brush.get_brush_style():
+        x = 10 + 32  # 中心点
+        y = 180 + 32  # 中心点
+        if self.brush.get_brush_style():  # 有样式
             x = x - size
             y = y - size
             self.screen.blit(self.brush.get_current_brush(), (x, y))
-        else:
+        else:  # 无样式
             pygame.draw.circle(self.screen,
                                self.brush.get_color(), (x, y), size)
-        for (i, rgb) in enumerate(self.colors):
+        for (i, rgb) in enumerate(self.colors):  # 颜色选项
             pygame.draw.rect(self.screen, rgb, self.colors_rect[i])
         # added by zhh
         self.screen.blit(self.fill_image, self.fill_rect.topleft)
