@@ -8,7 +8,6 @@ from tkinter import *
 
 
 # 修改颜色为指定label
-
 class Brush:
     def __init__(self, screen):
         self.screen = screen

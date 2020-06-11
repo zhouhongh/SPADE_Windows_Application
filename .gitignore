@@ -1,0 +1,5 @@
+.idea/
+*.tar.gz
+*.zip
+*.pkl
+*.pyc
