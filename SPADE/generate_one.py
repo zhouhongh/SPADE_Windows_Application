@@ -1,12 +1,12 @@
 """
 function: provide one label mapping pic, generate one realistic pic.
 author: zhouhonghong
-date: 2020/06/12
+date: 2020/06/13
 """
 
 from options.test_options import TestOptions
 from models.pix2pix_model import Pix2PixModel
-from data.base_dataset import BaseDataset, get_params, get_transform
+from data.base_dataset import get_params, get_transform
 
 import torch
 import matplotlib.pyplot as plt
@@ -53,8 +53,6 @@ def generate_one(label_img_path, image_path):
     # # 给定image_path即可保存
     # image_pil.save(image_path.replace('.jpg', '.png'))
     return img
-
-
 
 if __name__ =='__main__':
     label_img_path = './label_imgs/02.png'
