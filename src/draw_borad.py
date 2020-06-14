@@ -8,6 +8,7 @@ from tkinter import *
 from PIL import Image
 import matplotlib.pyplot as plt
 import multiprocessing as mp
+import datetime
 
 from options.test_options import TestOptions
 from models.pix2pix_model import Pix2PixModel
@@ -385,11 +386,14 @@ class Painter:
         label_img = color_2_label(image256)  # 转换为label
         im = Image.fromarray(label_img.astype(np.uint8))
         im.save('new_lena.png')
+        datetime_p = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")  # 格式化,去除非法字符
+        im.save('./log/label ' + datetime_p + '.png')
         label_img_path = './new_lena.png'
         image_path = './new_lena.png'
         img = generate_one(label_img_path, image_path)
         im = Image.fromarray(img)
         im.save('out_pic.png')
+        im.save('./log/out ' + datetime_p + '.png')
         plt.imshow(img)
         plt.show()
         print('Out2DNN')
