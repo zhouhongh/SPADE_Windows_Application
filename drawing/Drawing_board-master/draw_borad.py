@@ -5,9 +5,13 @@ import cv2 as cv
 import numpy as np
 import tkinter.filedialog
 from tkinter import *
+from PIL import Image
+import matplotlib.pyplot as plt
+import SPADE.color_2_label
+import SPADE.generate_one
 
 
-# 修改颜色为指定label
+# 无法导入SPADE下的color_2_label和generate_one函数
 class Brush:
     def __init__(self, screen):
         self.screen = screen
@@ -115,18 +119,22 @@ class Menu:
         self.screen = screen
         self.brush = None
         self.colors = [
-            (0xff, 0x00, 0xff), (0x80, 0x00, 0x80),
-            (0x00, 0x00, 0xff), (0x00, 0x00, 0x80),
-            (0x00, 0xff, 0xff), (0x00, 0x80, 0x80),
-            (0x00, 0xff, 0x00), (0x00, 0x80, 0x00),
-            (0xff, 0xff, 0x00), (0x80, 0x80, 0x00),
-            (0xff, 0x00, 0x00), (0x80, 0x00, 0x00),
-            (0xc0, 0xc0, 0xc0), (0xff, 0xff, 0xff),
-            (0x00, 0x00, 0x00), (0x80, 0x80, 0x80),
+            (135, 206, 235),
+            (34, 139, 34),
+            (169, 169, 169),
+            (124, 252, 0),
+            (160, 82, 45),
+            (165, 42, 42),
+            (0, 255, 255),
+            (0, 0, 128),
+            (220, 20, 60),
+            (244, 164, 96),
+            (0, 0, 0),
         ]
+        text = [u"天", u"树", u"路", u"草", u"土", u"山", u"水", u"海", u"花", u"沙", u"石", ]
         self.colors_rect = []
         for (i, rgb) in enumerate(self.colors):
-            rect = pygame.Rect(10 + i % 2 * 32, 254 + i / 2 * 32, 32, 32)
+            rect = pygame.Rect(10, 254 + i * 32, 32, 32)
             self.colors_rect.append(rect)
         # 画笔
         self.pens = [
@@ -166,6 +174,13 @@ class Menu:
         self.out2DNN_image = pygame.image.load("images/output.png").convert_alpha()
         self.doOut2DNN = False
 
+        # 字体
+        self.font = pygame.font.Font("black.TTC", 16)
+        self.text_rect = []
+        for i in text:
+            text_surface = self.font.render(i, True, (0, 0, 0))
+            self.text_rect.append(text_surface)
+
     def set_brush(self, brush):
         self.brush = brush
 
@@ -188,6 +203,8 @@ class Menu:
                                self.brush.get_color(), (x, y), size)
         for (i, rgb) in enumerate(self.colors):  # 颜色选项
             pygame.draw.rect(self.screen, rgb, self.colors_rect[i])
+        for (i, text) in enumerate(self.text_rect):  # 注释字
+            self.screen.blit(text, (52, 262 + i * 32))
         # added by zhh
         self.screen.blit(self.fill_image, self.fill_rect.topleft)
         # 保存按钮
@@ -238,9 +255,11 @@ class Menu:
 
 class Painter:
     def __init__(self):
+        pygame.init()
         self.MENU_WIDTH = 74
-        self.SCREEN_WIDTH = int(256 * 2.5) + self.MENU_WIDTH  # 确保画板保持256.256比例
-        self.SCREEN_HEIGHT = int(256 * 2.5)
+        self.BIGRATIO = 2.5
+        self.SCREEN_WIDTH = int(256 * self.BIGRATIO) + self.MENU_WIDTH  # 确保画板保持256.256比例
+        self.SCREEN_HEIGHT = int(256 * self.BIGRATIO)
 
         self.BROAD_WIDTH = self.SCREEN_WIDTH - self.MENU_WIDTH
         self.MENU_HEIGHT = self.SCREEN_HEIGHT
@@ -295,6 +314,24 @@ class Painter:
             input_img = pygame.image.load(filename).convert()
             self.sub_screen.blit(input_img, (0, 0))
 
+    def out_photo(self):
+        self.menu.doOut2DNN = False
+        image_data = pygame.surfarray.array3d(self.sub_screen)  # 获取图像
+        image_big = np.array(image_data)
+        image256 = np.zeros((256, 256, 3))
+        for i in range(256):  # Resize
+            for j in range(256):
+                image256[i][j][:] = image_big[int(i * self.BIGRATIO)][int(j * self.BIGRATIO)][:]
+        label_img = color_2_label(image256)  # 转换为label
+        im = Image.fromarray(label_img.astype(np.uint8))
+        im.save('new_lena.png')
+        label_img_path = './new_lena.png'
+        image_path = './new_lena.png'
+        img = generate_one(label_img_path, image_path)
+        plt.imshow(img)
+        plt.show()
+        print('Out2DNN')
+
     def run(self):
         self.screen.fill((255, 255, 255))
         while True:
@@ -314,8 +351,7 @@ class Painter:
                         elif self.menu.doInput:  # 导入
                             self.input_broad()
                         elif self.menu.doOut2DNN:  # 导出到DNN
-                            self.menu.doOut2DNN = False
-                            print('Out2DNN')
+                            self.out_photo()
                     # added by zhh
                     # 点到按钮需要下次执行的
                     elif self.menu.doFill:
