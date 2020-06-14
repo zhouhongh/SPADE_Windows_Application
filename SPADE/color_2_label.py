@@ -6,9 +6,7 @@ author: zhouhonghong
 date: 2020/06/13
 """
 import numpy as np
-from PIL import Image
 import cv2
-import os
 
 # pil转numpy
 # img = numpy.array(img)
@@ -25,8 +23,6 @@ def color_2_label(input_img):
     # label_img = np.int8(label_img)
 
     for i in range(11):
-        a = color_list[i]
-        b = input_img - color_list[i]
         mapped_pixels = (input_img - color_list[i]) == 0 # 和第i个类别匹配的像素为true
         mapped_pixels_1 = mapped_pixels[:, :, 0] * mapped_pixels[:, :, 1] * mapped_pixels[:, :, 2]
         label_img[mapped_pixels_1] = label_list[i]
