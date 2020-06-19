@@ -27,11 +27,11 @@ def color_2_label(input_img):
                   [165, 42, 42], [0, 255, 255], [0, 0, 128], [0, 0, 0], [244, 164, 96], [220, 20, 60]]   # 11种预设颜色值
     label_list = [3, 5, 7, 10, 14, 17, 22, 27, 35, 47, 67]      # 11种label，排列顺序和color_list对应
 
-    label_img = np.full((256, 256), 151) # 使用151(代表unknown)初始化
+    label_img = np.full((256, 256), 3) # 使用3（天空）初始化
     # label_img = np.int8(label_img)
 
     for i in range(11):
-        mapped_pixels = (input_img - color_list[i]) == 0 # 和第i个类别匹配的像素为true
+        mapped_pixels = abs((input_img - color_list[i])) < 5 # 和第i个类别匹配的像素为true,允许误差5个像素值
         mapped_pixels_1 = mapped_pixels[:, :, 0] * mapped_pixels[:, :, 1] * mapped_pixels[:, :, 2]
         label_img[mapped_pixels_1] = label_list[i]
 
@@ -361,10 +361,10 @@ class Painter:
         root.destroy()
         print(filename)
         self.menu.doSave = False
-        if '.jpg' in filename:
+        if '.png' in filename:
             pygame.image.save(self.sub_screen, filename)
         else:
-            pygame.image.save(self.sub_screen, filename + '.jpg')
+            pygame.image.save(self.sub_screen, filename + '.png')
 
     def input_broad(self):
         self.menu.doInput = False
