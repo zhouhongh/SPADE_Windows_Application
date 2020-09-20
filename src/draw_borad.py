@@ -9,7 +9,6 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 import datetime
-
 from options.test_options import TestOptions
 from models.pix2pix_model import Pix2PixModel
 from data.base_dataset import get_params, get_transform

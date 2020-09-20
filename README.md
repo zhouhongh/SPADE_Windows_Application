@@ -2,7 +2,7 @@
 本项目使用了SPADE项目的网络：https://github.com/NVlabs/SPADE
 预训练模型请在此项目提供的谷歌云盘下载，放到路径：./src/checkpoints/ade20k_pretrained/latest_net_G.pth。
 本项目仅用于我的课程设计，请勿商用。
-直接运行src目录下的draw.py即可。按esc键可以清空画板。
+直接运行src目录下的draw_board.py即可。按esc键可以清空画板。
 # 一、概述： 
 
 本系统的主要面向用户是影视特效设计人员和普通群众，并力求达到以下目标：
